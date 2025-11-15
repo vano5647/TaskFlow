@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowTask - Распределение обязанностей</title>
+    <style>
+        :root {
+            --orange: #FF7F32;
+            --purple: #8A2BE2;
+            --white: #FFFFFF;
+            --light-gray: #F5F5F5;
+            --dark-gray: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--orange), var(--purple));
+            color: var(--white);
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background-color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--purple);
+            font-weight: bold;
+            font-size: 24px;
+        }
+        
+        .logo-text {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        
+        nav a:hover {
+            opacity: 0.8;
+        }
+        
+        /* Auth Section Styles */
+        .auth-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+            padding: 40px 0;
+        }
+        
+        .auth-container {
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .auth-tab.active {
+            color: var(--purple);
+            border-bottom: 2px solid var(--purple);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            background-color: var(--orange);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #e66a1f;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            padding: 40px 0;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-title {
+            font-size: 24px;
+            color: var(--purple);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: bold;
+        }
+        
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--purple);
+        }
+        
+        .card-icon {
+            color: var(--orange);
+            font-size: 20px;
+        }
+        
+        .task-list {
+            list-style: none;
+        }
+        
+        .task-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-info h4 {
+            margin-bottom: 5px;
+        }
+        
+        .task-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+        
+        .status-completed {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        
+        /* Admin Panel Styles */
+        .admin-panel {
+            display: none;
+            padding: 40px 0;
+        }
+        
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-btn {
+            background-color: var(--purple);
+            color: var(--white);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .admin-btn:hover {
+            background-color: #7a1fd2;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            color: var(--purple);
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark-gray);
+        }
+        
+        /* Footer Styles */
+        footer {
+            background-color: var(--dark-gray);
+            color: var(--white);
+            padding: 30px 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .footer-logo-icon {
+            width: 30px;
+            height: 30px;
+            background-color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--purple);
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">F</div>
+                    <div class="logo-text">FlowTask</div>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" id="home-link">Главная</a></li>
+                        <li><a href="#" id="about-link">О системе</a></li>
+                        <li><a href="#" id="contact-link">Контакты</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Auth Section -->
+    <section class="auth-section" id="auth-section">
+        <div class="auth-container">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">Вход</div>
+                <div class="auth-tab" data-tab="register">Регистрация</div>
+            </div>
+            
+            <form class="auth-form active" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Введите email" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Пароль</label>
+                    <input type="password" id="login-password" placeholder="Введите пароль" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-role">Роль</label>
+                    <select id="login-role">
+                        <option value="employee">Сотрудник</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Войти</button>
+            </form>
+            
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-name">ФИО</label>
+                    <input type="text" id="register-name" placeholder="Введите ФИО" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Введите email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Пароль</label>
+                    <input type="password" id="register-password" placeholder="Введите пароль" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-role">Роль</label>
+                    <select id="register-role">
+                        <option value="employee">Сотрудник</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Зарегистрироваться</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Employee Dashboard -->
+    <section class="dashboard" id="employee-dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Мои обязанности</h2>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar">ИИ</div>
+                    <div>
+                        <div id="user-name">Иванов Иван</div>
+                        <button class="btn" id="logout-btn" style="width: auto; padding: 5px 10px; margin-top: 5px;">Выйти</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Текущие обязанности</h3>
+                        <div class="card-icon">📋</div>
+                    </div>
+                    <ul class="task-list" id="current-tasks">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Завершенные обязанности</h3>
+                        <div class="card-icon">✅</div>
+                    </div>
+                    <ul class="task-list" id="completed-tasks">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section class="admin-panel" id="admin-dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2 class="dashboard-title">Панель администратора</h2>
+                <div class="user-info">
+                    <div class="user-avatar" id="admin-avatar">АА</div>
+                    <div>
+                        <div id="admin-name">Админ Админов</div>
+                        <button class="btn" id="admin-logout-btn" style="width: auto; padding: 5px 10px; margin-top: 5px;">Выйти</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-controls">
+                <button class="admin-btn" id="add-task-btn">Назначить обязанность</button>
+                <button class="admin-btn" id="add-employee-btn">Добавить сотрудника</button>
+                <button class="admin-btn" id="add-duty-type-btn">Добавить тип обязанности</button>
+            </div>
+            
+            <div class="dashboard-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Все сотрудники</h3>
+                        <div class="card-icon">👥</div>
+                    </div>
+                    <ul class="task-list" id="employees-list">
+                        <!-- Employees will be populated by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Типы обязанностей</h3>
+                        <div class="card-icon">📝</div>
+                    </div>
+                    <ul class="task-list" id="duty-types-list">
+                        <!-- Duty types will be populated by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Активные обязанности</h3>
+                        <div class="card-icon">⏳</div>
+                    </div>
+                    <ul class="task-list" id="admin-current-tasks">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Завершенные обязанности</h3>
+                        <div class="card-icon">✅</div>
+                    </div>
+                    <ul class="task-list" id="admin-completed-tasks">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <div class="modal" id="add-task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Назначить обязанность</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="add-task-form">
+                <div class="form-group">
+                    <label for="task-employee">Сотрудник</label>
+                    <select id="task-employee" required>
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-duty-type">Тип обязанности</label>
+                    <select id="task-duty-type" required>
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-start-date">Дата начала</label>
+                    <input type="date" id="task-start-date" required>
+                </div>
+                <button type="submit" class="btn">Назначить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="add-employee-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Добавить сотрудника</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="add-employee-form">
+                <div class="form-group">
+                    <label for="employee-name">ФИО</label>
+                    <input type="text" id="employee-name" placeholder="Введите ФИО" required>
+                </div>
+                <div class="form-group">
+                    <label for="employee-salary">Оклад</label>
+                    <input type="number" id="employee-salary" placeholder="Введите оклад" required>
+                </div>
+                <button type="submit" class="btn">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="add-duty-type-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Добавить тип обязанности</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="add-duty-type-form">
+                <div class="form-group">
+                    <label for="duty-description">Описание</label>
+                    <input type="text" id="duty-description" placeholder="Введите описание" required>
+                </div>
+                <div class="form-group">
+                    <label for="duty-payment">Оплата за день</label>
+                    <input type="number" id="duty-payment" placeholder="Введите оплату за день" required>
+                </div>
+                <button type="submit" class="btn">Добавить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="footer-logo-icon">F</div>
+                    <div>FlowTask</div>
+                </div>
+                <p>Система распределения дополнительных обязанностей в коммерческой компании</p>
+                <p>© 2023 FlowTask. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sample data for demonstration
+        let employees = [
+            { id: 1, name: "Иванов Иван Иванович", salary: 50000 },
+            { id: 2, name: "Петров Петр Петрович", salary: 45000 },
+            { id: 3, name: "Сидорова Анна Сергеевна", salary: 48000 }
+        ];
+
+        let dutyTypes = [
+            { id: 1, description: "Организация корпоративного мероприятия", payment: 1500 },
+            { id: 2, description: "Проведение внутреннего обучения", payment: 2000 },
+            { id: 3, description: "Участие в отборе кандидатов", payment: 1200 }
+        ];
+
+        let tasks = [
+            { employeeId: 1, dutyTypeId: 1, startDate: "2023-10-01", endDate: null },
+            { employeeId: 2, dutyTypeId: 2, startDate: "2023-10-05", endDate: "2023-10-10" },
+            { employeeId: 3, dutyTypeId: 3, startDate: "2023-09-20", endDate: "2023-09-25" }
+        ];
+
+        let users = [
+            { email: "employee@example.com", password: "123", role: "employee", name: "Иванов Иван Иванович" },
+            { email: "admin@example.com", password: "123", role: "admin", name: "Админ Админов" }
+        ];
+
+        // DOM Elements
+        const authSection = document.getElementById('auth-section');
+        const employeeDashboard = document.getElementById('employee-dashboard');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const logoutBtn = document.getElementById('logout-btn');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const addEmployeeBtn = document.getElementById('add-employee-btn');
+        const addDutyTypeBtn = document.getElementById('add-duty-type-btn');
+        const addTaskModal = document.getElementById('add-task-modal');
+        const addEmployeeModal = document.getElementById('add-employee-modal');
+        const addDutyTypeModal = document.getElementById('add-duty-type-modal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const addTaskForm = document.getElementById('add-task-form');
+        const addEmployeeForm = document.getElementById('add-employee-form');
+        const addDutyTypeForm = document.getElementById('add-duty-type-form');
+        const taskEmployeeSelect = document.getElementById('task-employee');
+        const taskDutyTypeSelect = document.getElementById('task-duty-type');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        const adminName = document.getElementById('admin-name');
+        const adminAvatar = document.getElementById('admin-avatar');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                showDashboard(currentUser);
+            }
+            
+            // Populate selects in modals
+            populateEmployeeSelect();
+            populateDutyTypeSelect();
+            
+            // Render initial data
+            renderEmployeeTasks();
+            renderAdminData();
+        });
+
+        // Auth Tab Switching
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Update active tab
+                authTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding form
+                document.querySelectorAll('.auth-form').forEach(form => {
+                    form.classList.remove('active');
+                });
+                document.getElementById(`${tabId}-form`).classList.add('active');
+            });
+        });
+
+        // Login Form Submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const role = document.getElementById('login-role').value;
+            
+            // Simple validation
+            const user = users.find(u => u.email === email && u.password === password && u.role === role);
+            
+            if (user) {
+                // Save user to localStorage
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // Show appropriate dashboard
+                showDashboard(user);
+            } else {
+                alert('Неверные учетные данные!');
+            }
+        });
+
+        // Register Form Submission
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const role = document.getElementById('register-role').value;
+            
+            // Check if user already exists
+            if (users.find(u => u.email === email)) {
+                alert('Пользователь с таким email уже существует!');
+                return;
+            }
+            
+            // Add new user
+            const newUser = { email, password, role, name };
+            users.push(newUser);
+            
+            // If registering as employee, also add to employees list
+            if (role === 'employee') {
+                const newEmployee = {
+                    id: employees.length + 1,
+                    name: name,
+                    salary: 40000 // Default salary
+                };
+                employees.push(newEmployee);
+            }
+            
+            alert('Регистрация успешна! Теперь вы можете войти.');
+            
+            // Switch to login tab
+            authTabs.forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-tab="login"]').classList.add('active');
+            
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById('login-form').classList.add('active');
+            
+            // Clear form
+            registerForm.reset();
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            showAuthSection();
+        });
+
+        adminLogoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            showAuthSection();
+        });
+
+        // Modal Controls
+        addTaskBtn.addEventListener('click', function() {
+            addTaskModal.style.display = 'flex';
+        });
+
+        addEmployeeBtn.addEventListener('click', function() {
+            addEmployeeModal.style.display = 'flex';
+        });
+
+        addDutyTypeBtn.addEventListener('click', function() {
+            addDutyTypeModal.style.display = 'flex';
+        });
+
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.modal').style.display = 'none';
+            });
+        });
+
+        // Add Task Form Submission
+        addTaskForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const employeeId = parseInt(taskEmployeeSelect.value);
+            const dutyTypeId = parseInt(taskDutyTypeSelect.value);
+            const startDate = document.getElementById('task-start-date').value;
+            
+            // Add new task
+            const newTask = {
+                employeeId: employeeId,
+                dutyTypeId: dutyTypeId,
+                startDate: startDate,
+                endDate: null
+            };
+            
+            tasks.push(newTask);
+            
+            // Update displays
+            renderEmployeeTasks();
+            renderAdminData();
+            
+            // Close modal and reset form
+            addTaskModal.style.display = 'none';
+            addTaskForm.reset();
+            
+            alert('Обязанность успешно назначена!');
+        });
+
+        // Add Employee Form Submission
+        addEmployeeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('employee-name').value;
+            const salary = parseInt(document.getElementById('employee-salary').value);
+            
+            // Add new employee
+            const newEmployee = {
+                id: employees.length + 1,
+                name: name,
+                salary: salary
+            };
+            
+            employees.push(newEmployee);
+            
+            // Update employee select in add task modal
+            populateEmployeeSelect();
+            
+            // Update admin display
+            renderAdminData();
+            
+            // Close modal and reset form
+            addEmployeeModal.style.display = 'none';
+            addEmployeeForm.reset();
+            
+            alert('Сотрудник успешно добавлен!');
+        });
+
+        // Add Duty Type Form Submission
+        addDutyTypeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const description = document.getElementById('duty-description').value;
+            const payment = parseInt(document.getElementById('duty-payment').value);
+            
+            // Add new duty type
+            const newDutyType = {
+                id: dutyTypes.length + 1,
+                description: description,
+                payment: payment
+            };
+            
+            dutyTypes.push(newDutyType);
+            
+            // Update duty type select in add task modal
+            populateDutyTypeSelect();
+            
+            // Update admin display
+            renderAdminData();
+            
+            // Close modal and reset form
+            addDutyTypeModal.style.display = 'none';
+            addDutyTypeForm.reset();
+            
+            alert('Тип обязанности успешно добавлен!');
+        });
+
+        // Helper Functions
+        function showDashboard(user) {
+            authSection.style.display = 'none';
+            
+            if (user.role === 'employee') {
+                employeeDashboard.style.display = 'block';
+                adminDashboard.style.display = 'none';
+                
+                // Set user info
+                userName.textContent = user.name;
+                userAvatar.textContent = getInitials(user.name);
+            } else {
+                employeeDashboard.style.display = 'none';
+                adminDashboard.style.display = 'block';
+                
+                // Set admin info
+                adminName.textContent = user.name;
+                adminAvatar.textContent = getInitials(user.name);
+            }
+        }
+
+        function showAuthSection() {
+            authSection.style.display = 'flex';
+            employeeDashboard.style.display = 'none';
+            adminDashboard.style.display = 'none';
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(word => word[0]).join('').toUpperCase();
+        }
+
+        function populateEmployeeSelect() {
+            taskEmployeeSelect.innerHTML = '';
+            employees.forEach(employee => {
+                const option = document.createElement('option');
+                option.value = employee.id;
+                option.textContent = employee.name;
+                taskEmployeeSelect.appendChild(option);
+            });
+        }
+
+        function populateDutyTypeSelect() {
+            taskDutyTypeSelect.innerHTML = '';
+            dutyTypes.forEach(dutyType => {
+                const option = document.createElement('option');
+                option.value = dutyType.id;
+                option.textContent = dutyType.description;
+                taskDutyTypeSelect.appendChild(option);
+            });
+        }
+
+        function renderEmployeeTasks() {
+            const currentTasksList = document.getElementById('current-tasks');
+            const completedTasksList = document.getElementById('completed-tasks');
+            
+            // Clear lists
+            currentTasksList.innerHTML = '';
+            completedTasksList.innerHTML = '';
+            
+            // Get current user
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser || currentUser.role !== 'employee') return;
+            
+            // Find employee by name
+            const employee = employees.find(emp => emp.name === currentUser.name);
+            if (!employee) return;
+            
+            // Filter tasks for this employee
+            const employeeTasks = tasks.filter(task => task.employeeId === employee.id);
+            
+            // Render current tasks
+            employeeTasks.filter(task => !task.endDate).forEach(task => {
+                const dutyType = dutyTypes.find(dt => dt.id === task.dutyTypeId);
+                if (!dutyType) return;
+                
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <div class="task-info">
+                        <h4>${dutyType.description}</h4>
+                        <p>Начало: ${formatDate(task.startDate)}</p>
+                        <p>Оплата: ${dutyType.payment} руб./день</p>
+                    </div>
+                    <span class="task-status status-active">Активно</span>
+                `;
+                currentTasksList.appendChild(taskItem);
+            });
+            
+            // Render completed tasks
+            employeeTasks.filter(task => task.endDate).forEach(task => {
+                const dutyType = dutyTypes.find(dt => dt.id === task.dutyTypeId);
+                if (!dutyType) return;
+                
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <div class="task-info">
+                        <h4>${dutyType.description}</h4>
+                        <p>Начало: ${formatDate(task.startDate)}</p>
+                        <p>Окончание: ${formatDate(task.endDate)}</p>
+                        <p>Оплата: ${dutyType.payment} руб./день</p>
+                    </div>
+                    <span class="task-status status-completed">Завершено</span>
+                `;
+                completedTasksList.appendChild(taskItem);
+            });
+        }
+
+        function renderAdminData() {
+            const employeesList = document.getElementById('employees-list');
+            const dutyTypesList = document.getElementById('duty-types-list');
+            const adminCurrentTasks = document.getElementById('admin-current-tasks');
+            const adminCompletedTasks = document.getElementById('admin-completed-tasks');
+            
+            // Clear lists
+            employeesList.innerHTML = '';
+            dutyTypesList.innerHTML = '';
+            adminCurrentTasks.innerHTML = '';
+            adminCompletedTasks.innerHTML = '';
+            
+            // Render employees
+            employees.forEach(employee => {
+                const employeeItem = document.createElement('li');
+                employeeItem.className = 'task-item';
+                employeeItem.innerHTML = `
+                    <div class="task-info">
+                        <h4>${employee.name}</h4>
+                        <p>Оклад: ${employee.salary} руб.</p>
+                    </div>
+                `;
+                employeesList.appendChild(employeeItem);
+            });
+            
+            // Render duty types
+            dutyTypes.forEach(dutyType => {
+                const dutyTypeItem = document.createElement('li');
+                dutyTypeItem.className = 'task-item';
+                dutyTypeItem.innerHTML = `
+                    <div class="task-info">
+                        <h4>${dutyType.description}</h4>
+                        <p>Оплата: ${dutyType.payment} руб./день</p>
+                    </div>
+                `;
+                dutyTypesList.appendChild(dutyTypeItem);
+            });
+            
+            // Render current tasks
+            tasks.filter(task => !task.endDate).forEach(task => {
+                const employee = employees.find(emp => emp.id === task.employeeId);
+                const dutyType = dutyTypes.find(dt => dt.id === task.dutyTypeId);
+                if (!employee || !dutyType) return;
+                
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <div class="task-info">
+                        <h4>${dutyType.description}</h4>
+                        <p>Сотрудник: ${employee.name}</p>
+                        <p>Начало: ${formatDate(task.startDate)}</p>
+                        <p>Оплата: ${dutyType.payment} руб./день</p>
+                    </div>
+                    <span class="task-status status-active">Активно</span>
+                `;
+                adminCurrentTasks.appendChild(taskItem);
+            });
+            
+            // Render completed tasks
+            tasks.filter(task => task.endDate).forEach(task => {
+                const employee = employees.find(emp => emp.id === task.employeeId);
+                const dutyType = dutyTypes.find(dt => dt.id === task.dutyTypeId);
+                if (!employee || !dutyType) return;
+                
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <div class="task-info">
+                        <h4>${dutyType.description}</h4>
+                        <p>Сотрудник: ${employee.name}</p>
+                        <p>Начало: ${formatDate(task.startDate)}</p>
+                        <p>Окончание: ${formatDate(task.endDate)}</p>
+                        <p>Оплата: ${dutyType.payment} руб./день</p>
+                    </div>
+                    <span class="task-status status-completed">Завершено</span>
+                `;
+                adminCompletedTasks.appendChild(taskItem);
+            });
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Не указано';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU');
+        }
+    </script>
+</body>
+</html>
